@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PRO DJ Soundboard</title>
+  <style>
+    :root {
+      --bg: #070913;
+      --panel: #0e1222;
+      --accent: #00f0ff;
+      --accent-red: #ff0055;
+      --text: #f0f4f8;
+      --card-bg: #161b31;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      padding-bottom: 95px; /* Extra space so content clears the sticky footer */
+    }
+
+    .deck {
+      background: var(--panel);
+      border: 1px solid #1f2642;
+      border-radius: 20px;
+      padding: 14px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2642;
+      padding-bottom: 10px;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    }
+
+    .status {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00ff88;
+    }
+
+    /* Fixed Sticky Bottom Controls */
+    .fixed-controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(7, 9, 19, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid #1f2642;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .fixed-controls-inner {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .stop-btn {
+      background: var(--accent-red);
+      color: #fff;
+      border: none;
+      padding: 16px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255, 0, 85, 0.5);
+      text-transform: uppercase;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .stop-btn:active {
+      transform: scale(0.97);
+      background: #ff2a75;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-top: 4px;
+      margin-bottom: -4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #1f2642;
+    }
+
+    /* Mobile First: Strict 2 columns for easy mobile tapping */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    /* Scale to 3 columns on wider displays */
+    @media (min-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .pad {
+      background: var(--card-bg);
+      border: 2px solid #232d52;
+      border-radius: 16px;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.05s ease, background-color 0.05s ease;
+    }
+
+    .pad:active, .pad.active {
+      transform: scale(0.95);
+      background: var(--accent);
+      color: #000;
+      border-color: #fff;
+      box-shadow: 0 0 20px var(--accent);
+    }
+
+    .pad.active .pad-icon {
+      transform: scale(1.15);
+    }
+
+    .pad-icon {
+      font-size: 32px;
+      transition: transform 0.05s ease;
+    }
+
+    .pad-name {
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      padding: 0 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .hotkey {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #626983;
+      background: #0a0d1a;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .pad.active .hotkey {
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+    }
+
+    .instructions {
+      text-align: center;
+      font-size: 11px;
+      color: #626983;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck">
+    <div class="header">
+      <div class="title">🎧 DJ SOUNDBOARD</div>
+      <div class="status">Live</div>
+    </div>
+
+    <!-- Traditional Sounds Section -->
+    <div class="section-title">🔊 Traditional Sounds</div>
+    <div class="grid" id="traditionalGrid"></div>
+
+    <!-- Meme Sounds Section -->
+    <div class="section-title">🔥 Meme Sounds</div>
+    <div class="grid" id="memeGrid"></div>
+
+    <div class="instructions">
+      Tap any pad to play. Press <strong>ESC / Space</strong> or use the sticky stop button below.
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Controls -->
+  <div class="fixed-controls">
+    <div class="fixed-controls-inner">
+      <button class="stop-btn" id="stopBtn">
+        ⏹ Stop All Sounds
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const traditionalGrid = document.getElementById('traditionalGrid');
+    const memeGrid = document.getElementById('memeGrid');
+    const stopBtn = document.getElementById('stopBtn');
+
+    let activeAudios = [];
+
+    const traditionalSounds = [
+      { name: "Applause", emoji: "👏", src: "Applause.mp3", key: "1" },
+      { name: "Audience Laugh", emoji: "😂", src: "Audience Laugh.mp3", key: "2" },
+      { name: "Cheering", emoji: "🎉", src: "Cheering.mp3", key: "3" },
+      { name: "Booing", emoji: "👎", src: "Booing.mp3", key: "4" },
+      { name: "Drum for Joke", emoji: "🥁", src: "Drum for joke.mp3", key: "5" },
+      { name: "Sad Trombone", emoji: "🎺", src: "Sad Trombone.mp3", key: "6" },
+      { name: "Victory Fanfare", emoji: "🏆", src: "Victory Fanfare.mp3", key: "7" },
+      { name: "Drum Roll", emoji: "🥁", src: "Drum Roll.mp3", key: "8" },
+      { name: "Airhorn", emoji: "📢", src: "Airhorn.mp3", key: "9" }
+    ];
+
+    const memeSounds = [
+      { name: "Laugh", emoji: "😆", src: "laugh.mp3", key: "0" },
+      { name: "Tiny Violin", emoji: "🎻", src: "tiny-violin.mp3", key: "Q" },
+      { name: "Watchout", emoji: "🚨", src: "watchout.mp3", key: "W" },
+      { name: "Vine Boom", emoji: "💥", src: "vine-boom-sound-effect_KT89XIq.mp3", key: "E" },
+      { name: "Sad Meow", emoji: "🐱", src: "sad-meow-song.mp3", key: "R" },
+      { name: "Dry Fart", emoji: "💨", src: "dry-fart.mp3", key: "T" },
+      { name: "A Few Moments Later", emoji: "⏱️", src: "A few moments later.mp3", key: "Y" },
+      { name: "Faaah", emoji: "🗣️", src: "faaah.mp3", key: "U" },
+      { name: "Finish Him", emoji: "⚔️", src: "Finish Him.mp3", key: "I" },
+      { name: "Fatality", emoji: "☠️", src: "Fatality.mp3", key: "O" },
+      { name: "Cena", emoji: "🎺", src: "cena.mp3", key: "P" },
+      { name: "San Andreas", emoji: "🎮", src: "Voicy_og gta san andreas theme.mp3", key: "A" }
+    ];
+
+    const allSounds = [...traditionalSounds, ...memeSounds];
+
+    function createPad(sound) {
+      const pad = document.createElement('div');
+      pad.className = 'pad';
+
+      const hotkey = document.createElement('span');
+      hotkey.className = 'hotkey';
+      hotkey.textContent = `#${sound.key}`;
+      pad.appendChild(hotkey);
+
+      const icon = document.createElement('span');
+      icon.className = 'pad-icon';
+      icon.textContent = sound.emoji;
+      pad.appendChild(icon);
+
+      const name = document.createElement('span');
+      name.className = 'pad-name';
+      name.textContent = sound.name;
+      pad.appendChild(name);
+
+      pad.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        triggerPad(pad, sound.src);
+      });
+
+      return pad;
+    }
+
+    function renderGrids() {
+      traditionalGrid.innerHTML = '';
+      memeGrid.innerHTML = '';
+
+      traditionalSounds.forEach(sound => {
+        traditionalGrid.appendChild(createPad(sound));
+      });
+
+      memeSounds.forEach(sound => {
+        memeGrid.appendChild(createPad(sound));
+      });
+    }
+
+    function triggerPad(padElement, src) {
+      padElement.classList.add('active');
+      setTimeout(() => padElement.classList.remove('active'), 150);
+
+      const audio = new Audio(src);
+      activeAudios.push(audio);
+
+      audio.addEventListener('ended', () => {
+        activeAudios = activeAudios.filter(a => a !== audio);
+      });
+
+      audio.play().catch(err => {
+        console.error("Playback error:", err);
+        alert(`Could not play "${src}". Please verify the exact filename is uploaded to your GitHub repository.`);
+      });
+    }
+
+    function stopAllSounds() {
+      activeAudios.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+      activeAudios = [];
+    }
+
+    stopBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      stopAllSounds();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        stopAllSounds();
+        return;
+      }
+
+      const soundMatch = allSounds.find(s => s.key.toUpperCase() === e.key.toUpperCase());
+      if (soundMatch) {
+        const allPads = document.querySelectorAll('.pad');
+        const index = allSounds.indexOf(soundMatch);
+        if (allPads[index]) {
+          triggerPad(allPads[index], soundMatch.src);
+        }
+      }
+    });
+
+    renderGrids();
+  </script>
+</body>
+</html>
