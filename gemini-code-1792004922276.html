@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRO DJ Soundboard</title>
+  <style>
+    :root {
+      --bg: #0b0d17;
+      --panel: #141829;
+      --accent: #00f0ff;
+      --text: #e0e6ed;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .deck {
+      background: var(--panel);
+      border: 2px solid #232946;
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 800px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 240, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #232946;
+      padding-bottom: 16px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .status {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #626983;
+    }
+
+    .status.active {
+      color: #00ff88;
+      text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #0d101d;
+      padding: 16px;
+      border-radius: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #8b95b5;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      background: #1f2438;
+      height: 8px;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .pad {
+      background: #1a1f36;
+      border: 2px solid #2e3654;
+      border-radius: 16px;
+      height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pad:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .pad:active, .pad.active {
+      transform: translateY(2px);
+      background: var(--accent);
+      color: #000;
+      border-color: #fff;
+      box-shadow: 0 0 25px var(--accent);
+    }
+
+    .pad.active .pad-icon {
+      transform: scale(1.2);
+    }
+
+    .pad-icon {
+      font-size: 32px;
+      transition: transform 0.1s ease;
+    }
+
+    .pad-name {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .hotkey {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #626983;
+      background: #0d101d;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .pad.active .hotkey {
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+    }
+
+    .instructions {
+      text-align: center;
+      font-size: 12px;
+      color: #626983;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck">
+    <div class="header">
+      <div class="title">🎧 DJ SOUNDBOARD</div>
+      <div class="status" id="status">Ready</div>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="volume">Master Volume</label>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="pad" data-sound="Applause.mp3" data-key="1">
+        <span class="hotkey">KEY 1</span>
+        <span class="pad-icon">👏</span>
+        <span class="pad-name">Applause</span>
+      </div>
+
+      <div class="pad" data-sound="Audience Laugh.mp3" data-key="2">
+        <span class="hotkey">KEY 2</span>
+        <span class="pad-icon">😂</span>
+        <span class="pad-name">Audience Laugh</span>
+      </div>
+
+      <div class="pad" data-sound="Cheering.mp3" data-key="3">
+        <span class="hotkey">KEY 3</span>
+        <span class="pad-icon">🎉</span>
+        <span class="pad-name">Cheering</span>
+      </div>
+
+      <div class="pad" data-sound="Booing.mp3" data-key="4">
+        <span class="hotkey">KEY 4</span>
+        <span class="pad-icon">👎</span>
+        <span class="pad-name">Booing</span>
+      </div>
+
+      <div class="pad" data-sound="Drum for joke.mp3" data-key="5">
+        <span class="hotkey">KEY 5</span>
+        <span class="pad-icon">🥁</span>
+        <span class="pad-name">Drum for Joke</span>
+      </div>
+    </div>
+
+    <div class="instructions">
+      Click pads or press keys <strong>1 - 5</strong>. Make sure your MP3 files are in the same folder!
+    </div>
+  </div>
+
+  <script>
+    const volumeInput = document.getElementById('volume');
+
+    function playSound(filename) {
+      // Creates a new audio element instance each time so sounds can overlap (polyphony)
+      const audio = new Audio(filename);
+      audio.volume = parseFloat(volumeInput.value);
+      audio.play().catch(err => {
+        console.error("Playback error:", err);
+        alert("Could not play '" + filename + "'. Make sure the file is in the same folder as index.html and named correctly.");
+      });
+    }
+
+    function triggerPadUI(padElement) {
+      padElement.classList.add('active');
+      setTimeout(() => padElement.classList.remove('active'), 150);
+    }
+
+    // Click listeners
+    document.querySelectorAll('.pad').forEach(pad => {
+      pad.addEventListener('click', () => {
+        const filename = pad.getAttribute('data-sound');
+        triggerPadUI(pad);
+        playSound(filename);
+      });
+    });
+
+    // Keyboard hotkeys 1-5
+    window.addEventListener('keydown', (e) => {
+      const pad = document.querySelector(`.pad[data-key="${e.key}"]`);
+      if (pad) {
+        const filename = pad.getAttribute('data-sound');
+        triggerPadUI(pad);
+        playSound(filename);
+      }
+    });
+  </script>
+</body>
+</html>
