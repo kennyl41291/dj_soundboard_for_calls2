@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PRO DJ Soundboard</title>
+  <style>
+    :root {
+      --bg: #070913;
+      --panel: #0e1222;
+      --accent: #00f0ff;
+      --accent-red: #ff0055;
+      --text: #f0f4f8;
+      --card-bg: #161b31;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .deck {
+      background: var(--panel);
+      border: 1px solid #1f2642;
+      border-radius: 20px;
+      padding: 16px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2642;
+      padding-bottom: 12px;
+    }
+
+    .title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    }
+
+    .status {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00ff88;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #0a0d1a;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #171f38;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+    }
+
+    .control-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8b95b5;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] {
+      appearance: none;
+      background: #1f2642;
+      height: 10px;
+      border-radius: 5px;
+      outline: none;
+      width: 100%;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .stop-btn {
+      background: var(--accent-red);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+      text-transform: uppercase;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .stop-btn:active {
+      transform: scale(0.97);
+      background: #ff2a75;
+    }
+
+    /* Mobile First Grid: 2 columns on phones, 3 on larger screens */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 480px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .pad {
+      background: var(--card-bg);
+      border: 2px solid #232d52;
+      border-radius: 16px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.05s ease, background-color 0.05s ease;
+    }
+
+    .pad:active, .pad.active {
+      transform: scale(0.95);
+      background: var(--accent);
+      color: #000;
+      border-color: #fff;
+      box-shadow: 0 0 20px var(--accent);
+    }
+
+    .pad.active .pad-icon {
+      transform: scale(1.15);
+    }
+
+    .pad-icon {
+      font-size: 36px;
+      transition: transform 0.05s ease;
+    }
+
+    .pad-name {
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      padding: 0 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .hotkey {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #626983;
+      background: #0a0d1a;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .pad.active .hotkey {
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+    }
+
+    .instructions {
+      text-align: center;
+      font-size: 11px;
+      color: #626983;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="deck">
+    <div class="header">
+      <div class="title">🎧 DJ SOUNDBOARD</div>
+      <div class="status">Live</div>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label for="volume">Master Volume</label>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+      </div>
+      <button class="stop-btn" id="stopBtn">
+        ⏹ Stop All Sounds
+      </button>
+    </div>
+
+    <div class="grid" id="soundGrid"></div>
+
+    <div class="instructions">
+      Tap any pad to play. Use <strong>Stop All</strong> if a sound runs too long. Keyboard hotkeys (1–8) still work on desktop!
+    </div>
+  </div>
+
+  <script>
+    const volumeInput = document.getElementById('volume');
+    const soundGrid = document.getElementById('soundGrid');
+    const stopBtn = document.getElementById('stopBtn');
+
+    let activeAudios = [];
+
+    const sounds = [
+      { name: "Applause", emoji: "👏", src: "Applause.mp3", key: "1" },
+      { name: "Audience Laugh", emoji: "😂", src: "Audience Laugh.mp3", key: "2" },
+      { name: "Cheering", emoji: "🎉", src: "Cheering.mp3", key: "3" },
+      { name: "Booing", emoji: "👎", src: "Booing.mp3", key: "4" },
+      { name: "Drum for Joke", emoji: "🥁", src: "Drum for joke.mp3", key: "5" },
+      { name: "Sad Trombone", emoji: "🎺", src: "Sad Trombone.mp3", key: "6" },
+      { name: "Victory Fanfare", emoji: "🏆", src: "Victory Fanfare.mp3", key: "7" },
+      { name: "Drum Roll", emoji: "🥁", src: "Drum Roll.mp3", key: "8" }
+    ];
+
+    function renderGrid() {
+      soundGrid.innerHTML = '';
+      sounds.forEach((sound) => {
+        const pad = document.createElement('div');
+        pad.className = 'pad';
+
+        const hotkey = document.createElement('span');
+        hotkey.className = 'hotkey';
+        hotkey.textContent = `#${sound.key}`;
+        pad.appendChild(hotkey);
+
+        const icon = document.createElement('span');
+        icon.className = 'pad-icon';
+        icon.textContent = sound.emoji;
+        pad.appendChild(icon);
+
+        const name = document.createElement('span');
+        name.className = 'pad-name';
+        name.textContent = sound.name;
+        pad.appendChild(name);
+
+        // Support both touch and mouse clicks seamlessly without delay
+        pad.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          triggerPad(pad, sound.src);
+        });
+
+        soundGrid.appendChild(pad);
+      });
+    }
+
+    function triggerPad(padElement, src) {
+      padElement.classList.add('active');
+      setTimeout(() => padElement.classList.remove('active'), 150);
+
+      const audio = new Audio(src);
+      audio.volume = parseFloat(volumeInput.value);
+
+      activeAudios.push(audio);
+
+      audio.addEventListener('ended', () => {
+        activeAudios = activeAudios.filter(a => a !== audio);
+      });
+
+      audio.play().catch(err => {
+        console.error("Playback error:", err);
+      });
+    }
+
+    function stopAllSounds() {
+      activeAudios.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+      activeAudios = [];
+    }
+
+    stopBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      stopAllSounds();
+    });
+
+    // Keyboard support fallback for desktop
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        stopAllSounds();
+        return;
+      }
+
+      const index = parseInt(e.key) - 1;
+      if (index >= 0 && index < sounds.length) {
+        const pads = soundGrid.querySelectorAll('.pad');
+        if (pads[index]) {
+          triggerPad(pads[index], sounds[index].src);
+        }
+      }
+    });
+
+    renderGrid();
+  </script>
+</body>
+</html>
